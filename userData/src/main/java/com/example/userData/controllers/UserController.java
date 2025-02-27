@@ -2,8 +2,10 @@ package com.example.userData.controllers;
 
 import com.example.userData.model.User;
 import com.example.userData.services.UserService;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +18,12 @@ import java.util.List;
 public class UserController {
     public final UserService userService;
 
+    @Autowired
+    private MeterRegistry meterRegistry;
+
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
+        meterRegistry.counter("requests_to_users").increment();
         return ResponseEntity.status(HttpStatus.FOUND).body(userService.getAllUsers());
     }
 
@@ -32,6 +38,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> addUser(@RequestBody User user){
+        meterRegistry.counter("count_added_users").increment();
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.addUser(user));
 
     }
